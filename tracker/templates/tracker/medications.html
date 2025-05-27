@@ -1,0 +1,193 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-0 d-flex align-items-center">
+                <i class="fas fa-pills me-3 text-primary"></i>
+                Mes Médicaments
+            </h2>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'add_medication' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Ajouter un médicament
+            </a>
+        </div>
+    </div>
+
+    {% if medications %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for medication in medications %}
+                <div class="col">
+                    <div class="card h-100 medication-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title text-primary mb-0 medication-name">{{ medication.name }}</h5>
+                                <span class="badge bg-info">
+                                    <i class="fas fa-capsules me-1"></i>
+                                    {{ medication.get_form_display }}
+                                </span>
+                            </div>
+                            <div class="medication-details">
+                                <div class="info-row mb-3">
+                                    <div class="info-icon">
+                                        <i class="fas fa-prescription-bottle-alt text-primary"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <label class="text-muted small">Dosage</label>
+                                        <p class="mb-0">{{ medication.dosage }} {{ medication.get_unit_display }}</p>
+                                    </div>
+                                </div>
+                                <div class="info-row mb-3">
+                                    <div class="info-icon">
+                                        <i class="fas fa-notes-medical text-primary"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <label class="text-muted small">Instructions</label>
+                                        <p class="mb-0">{{ medication.instructions|default:"Aucune instruction spécifique" }}</p>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-icon">
+                                        <i class="fas fa-box text-primary"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <label class="text-muted small">Stock</label>
+                                        <p class="mb-0">{{ medication.current_stock|default:"Non spécifié" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button class="btn btn-outline-primary btn-sm" onclick="location.href='{% url 'add_dose' %}?medication_id={{ medication.id }}'">
+                                    <i class="fas fa-plus-circle me-1"></i> Ajouter une prise
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton{{ medication.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ medication.id }}">
+                                        <li><a class="dropdown-item" href="{% url 'edit_medication' medication.id %}"><i class="fas fa-edit me-2 text-primary"></i>Modifier</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="{% url 'delete_medication' medication.id %}"><i class="fas fa-trash-alt me-2"></i>Supprimer</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state text-center py-5">
+            <div class="empty-state-icon mb-4">
+                <i class="fas fa-prescription-bottle text-muted fa-4x"></i>
+            </div>
+            <h3 class="mb-3">Aucun médicament</h3>
+            <p class="text-muted mb-4">Vous n'avez pas encore ajouté de médicaments à votre liste.</p>
+            <a href="{% url 'add_medication' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Ajouter votre premier médicament
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .medication-card {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .medication-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .medication-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .info-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background-color: rgba(67, 97, 238, 0.1);
+        flex-shrink: 0;
+    }
+
+    .info-content {
+        flex: 1;
+    }
+
+    .info-content label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .info-content p {
+        color: var(--dark-color);
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.5em 1em;
+        border-radius: 6px;
+    }
+
+    .card-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .empty-state {
+        background-color: white;
+        border-radius: 1rem;
+        padding: 3rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+
+    .empty-state-icon {
+        color: var(--primary-color);
+        opacity: 0.5;
+    }
+
+    .dropdown-menu {
+        padding: 0.5rem;
+        min-width: 200px;
+    }
+
+    .dropdown-item {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .medication-card .card-body {
+            padding: 1rem;
+        }
+
+        .card-footer {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %} 

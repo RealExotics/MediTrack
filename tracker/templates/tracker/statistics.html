@@ -1,0 +1,208 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block title %}Statistiques d'Observance - MediTRACK{% endblock %}
+
+{% block content %}
+<h2>Statistiques d'Observance</h2>
+<p class="text-muted">Observance calculée sur les 30 derniers jours (du {{ start_date|date:"d/m/Y" }} au {{ end_date|date:"d/m/Y" }}).</p>
+<hr>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-header">Observance Globale</div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ adherence_percentage }}%;" 
+                         aria-valuenow="{{ adherence_percentage }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ adherence_percentage }}%
+                    </div>
+                </div>
+                <p class="card-text">({{ taken_doses }} / {{ total_doses }} prises)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Répartition des Doses (30 jours)</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-around">
+                    <div class="text-center">
+                        <h4 class="text-success">{{ taken_doses }}</h4>
+                        <p>Prises</p>
+                        <small class="text-muted">{{ taken_percentage }}% du total</small>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-danger">{{ missed_doses }}</h4>
+                        <p>Manquées</p>
+                        <small class="text-muted">{{ missed_percentage }}% du total</small>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-warning">{{ skipped_doses }}</h4>
+                        <p>Sautées</p>
+                        <small class="text-muted">{{ skipped_percentage }}% du total</small>
+                    </div>
+                     <div class="text-center">
+                        <h4 class="text-secondary">{{ total_doses }}</h4>
+                        <p>Total Prévues</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Tendance Hebdomadaire d'Observance</span>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="viewBar">Vue Barres</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="viewLine">Vue Ligne</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="height: 400px;">
+                    <canvas id="weeklyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
+    const weeklyTrendData = {{ weekly_trend|safe }};
+    let currentChart = null;
+
+    function createChart(type = 'bar') {
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        // Basic check if data exists
+        if (weeklyTrendData && weeklyTrendData.labels && weeklyTrendData.taken) {
+            currentChart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: weeklyTrendData.labels,
+                    datasets: [
+                        {
+                            label: 'Prises',
+                            data: weeklyTrendData.taken,
+                            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Manquées',
+                            data: weeklyTrendData.missed,
+                            backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Sautées',
+                            data: weeklyTrendData.skipped,
+                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Nombre de Doses'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Semaines'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#000',
+                            bodyColor: '#000',
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y + ' doses';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        } else {
+            const chartCanvas = document.getElementById('weeklyTrendChart');
+            const parentDiv = chartCanvas.parentElement;
+            parentDiv.innerHTML = '<div class="alert alert-info text-center m-3">Données insuffisantes pour afficher la tendance hebdomadaire.</div>';
+        }
+    }
+
+    // Initial chart creation
+    createChart('bar');
+
+    // Event listeners for chart type buttons
+    document.getElementById('viewBar').addEventListener('click', () => {
+        document.getElementById('viewBar').classList.add('active');
+        document.getElementById('viewLine').classList.remove('active');
+        createChart('bar');
+    });
+
+    document.getElementById('viewLine').addEventListener('click', () => {
+        document.getElementById('viewLine').classList.add('active');
+        document.getElementById('viewBar').classList.remove('active');
+        createChart('line');
+    });
+});
+</script>
+{% endblock %}
+

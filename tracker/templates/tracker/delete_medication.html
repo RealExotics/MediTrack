@@ -1,0 +1,67 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="delete-icon mb-3">
+                            <i class="fas fa-exclamation-triangle text-warning fa-3x"></i>
+                        </div>
+                        <h2 class="card-title">Supprimer le médicament</h2>
+                        <p class="text-muted">
+                            Êtes-vous sûr de vouloir supprimer le médicament <strong>{{ medication.name }}</strong> ?<br>
+                            Cette action est irréversible.
+                        </p>
+                    </div>
+                    
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'medications' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Confirmer la suppression
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        background-color: rgba(255, 193, 7, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .gap-3 {
+        gap: 1rem !important;
+    }
+</style>
+{% endblock %} 

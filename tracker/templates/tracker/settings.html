@@ -1,0 +1,33 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block title %}Paramètres - MediTRACK{% endblock %}
+
+{% block content %}
+<h2>Paramètres de l'Application</h2>
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="card">
+        <div class="card-header">
+            Notifications par E-mail
+        </div>
+        <div class="card-body">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="emailNotificationsSwitch" name="email_notifications" {% if email_notifications_enabled %}checked{% endif %}>
+                <label class="form-check-label" for="emailNotificationsSwitch">Activer les rappels de médicaments par e-mail</label>
+            </div>
+            <small class="form-text text-muted">
+                Si activé, vous recevrez des e-mails de rappel pour les prises de médicaments à venir. (Nécessite une configuration SMTP côté serveur).
+            </small>
+        </div>
+    </div>
+
+    {# Add other settings sections here as needed #}
+
+    <button type="submit" class="btn btn-primary mt-3">Enregistrer les Paramètres</button>
+</form>
+
+{% endblock %}
+

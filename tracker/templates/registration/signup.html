@@ -1,0 +1,54 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Inscription - MediTRACK{% endblock %}
+
+{% block content %}
+<h2>Créer un compte</h2>
+<hr>
+<form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary mt-3">S'inscrire</button>
+</form>
+
+<p class="mt-3">Déjà un compte ? <a href="{% url 'login' %}">Connectez-vous ici</a>.</p>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add Bootstrap form styling to Django form fields
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(field) {
+        if (field.type !== 'checkbox' && field.type !== 'radio' && field.type !== 'hidden') {
+            field.classList.add('form-control');
+        }
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            field.classList.add('form-check-input');
+        }
+        // Add is-invalid class if field has errors (Django adds 'errorlist')
+        if (field.closest('p').querySelector('.errorlist')) {
+             field.classList.add('is-invalid');
+        }
+    });
+
+    // Bootstrap validation script (optional for built-in forms, but good practice)
+    (function () {
+      'use strict'
+      var forms = document.querySelectorAll('.needs-validation')
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            // Basic check, Django handles more complex validation
+            // if (!form.checkValidity()) {
+            //   event.preventDefault()
+            //   event.stopPropagation()
+            // }
+            // form.classList.add('was-validated')
+          }, false)
+        })
+    })()
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,71 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Connexion - MediTRACK{% endblock %}
+
+{% block content %}
+<h2>Connexion</h2>
+<hr>
+
+{% if form.errors %}
+    <div class="alert alert-danger">
+        Votre nom d'utilisateur et mot de passe ne correspondent pas. Veuillez réessayer.
+    </div>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Votre compte n'a pas accès à cette page. Pour continuer,
+    veuillez vous connecter avec un compte qui y a accès.</p>
+    {% else %}
+    <p>Veuillez vous connecter pour voir cette page.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
+{% csrf_token %}
+
+<div class="mb-3">
+    <label for="{{ form.username.id_for_label }}" class="form-label">Nom d'utilisateur</label>
+    {{ form.username }}
+</div>
+<div class="mb-3">
+    <label for="{{ form.password.id_for_label }}" class="form-label">Mot de passe</label>
+    {{ form.password }}
+</div>
+
+<button type="submit" class="btn btn-primary">Se connecter</button>
+<input type="hidden" name="next" value="{{ next }}">
+</form>
+
+{# Assumes you setup password reset functionality separately #}
+{# <p><a href="{% url 'password_reset' %}">Mot de passe oublié ?</a></p> #}
+<p class="mt-3">Pas encore de compte ? <a href="{% url 'signup' %}">Inscrivez-vous ici</a>.</p>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add Bootstrap form styling to Django form fields
+document.addEventListener("DOMContentLoaded", function () {
+  document
+    .querySelectorAll("form input, form select, form textarea")
+    .forEach(function (field) {
+      if (
+        field.type !== "checkbox" &&
+        field.type !== "radio" &&
+        field.type !== "hidden"
+      ) {
+        field.classList.add("form-control");
+      }
+      if (field.type === "checkbox" || field.type === "radio") {
+        field.classList.add("form-check-input");
+      }
+      // Add is-invalid class if field has errors (Django adds 'errorlist')
+      if (field.closest("div").querySelector(".errorlist")) {
+        field.classList.add("is-invalid");
+      }
+    });
+});
+</script>
+{% endblock %}
+
